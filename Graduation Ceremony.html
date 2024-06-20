@@ -5,36 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graduation Attendance Ceremony</title>
     <style>
+		.container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 20vh; /* Full viewport height */
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
         table {
-            width: 80%;
+            width: 70%;
             border-collapse: collapse;
             margin: 20px auto;
         }
-        th, td {
-            border: 1px solid #dddddd;
+         th, td {
+            border: 2px solid #dddddd;
             text-align: left;
-            padding: 8px;
+            padding: 7px;
+			
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #0c86cc;<br>
+
         }
-        #searchInput {
-            width: 50%;
+		
+		 
+        .filter-input, .filter-select {
+            width: 40%;
             padding: 10px;
             margin: 20px auto;
             display: block;
             font-size: 16px;
         }
+    body h2 {
+}
     </style>
 </head>
 
 <body>
 
-    <h2 style="text-align: center;">Graduation Attendance Ceremony</h2>
 
-    <input type="text" id="searchInput" onkeyup="searchFunction()" placeholder="Search for student names..">
-
-    <table id="studentTable">
+    
+   
+<div class="container">
+        <img src="logo.png" width="220" height="100" alt="Logo"/>
+    </div>
+<h2 style="text-align: center;">Graduation  Ceremony&nbsp;Attendance</h2>
+	
+   
+<table id="studentTable">
+		
+		  <thead>
+            <tr>
+                <th><input type="text" id="nameSearchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search for student names.."></th>
+                <th> <select id="classSearchSelect" class="filter-select" onchange="filterTable()">
+        <option value="">Select class..</option>
+    </select></th>
+	
+            </tr>
+        </thead>
+		
         <thead>
             <tr>
                 <th>Student Name</th>
@@ -730,24 +759,58 @@
                 <td><input type="checkbox" name="attended98"></td>
                 <td><input type="checkbox" name="rsvp98"></td>
                 <td><input type="checkbox" name="collected98"></td>
+				
             </tr>
+			
+			 <tr><td colspan="5" style="text-align: center;"><button id="saveButton" onclick="saveCheckboxes()">Save</button></td></tr>
           
         </tbody>
     </table>
 
+  
+
     <script>
-        function searchFunction() {
-            var input, filter, table, tr, td, i, txtValue;
-            input = document.getElementById("searchInput");
-            filter = input.value.toUpperCase();
+        // Function to populate the class dropdown
+        function populateClassDropdown() {
+            var table, tr, td, i, classSet;
+            table = document.getElementById("studentTable");
+            tr = table.getElementsByTagName("tr");
+            classSet = new Set();
+
+            for (i = 1; i < tr.length; i++) { // Start at 1 to skip header row
+                td = tr[i].getElementsByTagName("td")[1]; // Index 1 for the class column
+                if (td) {
+                    classSet.add(td.textContent || td.innerText);
+                }
+            }
+
+            var classSearchSelect = document.getElementById("classSearchSelect");
+            classSet.forEach(function(className) {
+                var option = document.createElement("option");
+                option.value = className;
+                option.text = className;
+                classSearchSelect.add(option);
+            });
+        }
+
+        // Function to filter student names and classes
+        function filterTable() {
+            var nameInput, classSelect, nameFilter, classFilter, table, tr, tdName, tdClass, i, nameTxtValue, classTxtValue;
+            nameInput = document.getElementById("nameSearchInput");
+            classSelect = document.getElementById("classSearchSelect");
+            nameFilter = nameInput.value.toUpperCase();
+            classFilter = classSelect.value.toUpperCase();
             table = document.getElementById("studentTable");
             tr = table.getElementsByTagName("tr");
 
-            for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td")[0]; // Index 0 for the first column (Student Name)
-                if (td) {
-                    txtValue = td.textContent || td.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            for (i = 1; i < tr.length; i++) { // Start at 1 to skip header row
+                tdName = tr[i].getElementsByTagName("td")[0]; // Index 0 for the first column (Student Name)
+                tdClass = tr[i].getElementsByTagName("td")[1]; // Index 1 for the second column (Class)
+                if (tdName && tdClass) {
+                    nameTxtValue = tdName.textContent || tdName.innerText;
+                    classTxtValue = tdClass.textContent || tdClass.innerText;
+                    if ((nameTxtValue.toUpperCase().indexOf(nameFilter) > -1 || nameFilter === "") &&
+                        (classFilter === "" || classTxtValue.toUpperCase() === classFilter)) {
                         tr[i].style.display = "";
                     } else {
                         tr[i].style.display = "none";
@@ -755,7 +818,34 @@
                 }       
             }
         }
-    </script>
 
+        // Function to save checkbox states to local storage
+        function saveCheckboxes() {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox, index) => {
+                localStorage.setItem(`checkbox${index}`, checkbox.checked);
+            });
+            alert("Checkbox states saved!");
+        }
+
+        // Function to load checkbox states from local storage
+        function loadCheckboxes() {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox, index) => {
+                var checked = localStorage.getItem(`checkbox${index}`) === 'true';
+                checkbox.checked = checked;
+            });
+        }
+
+        // Load checkbox states and populate class dropdown when the page loads
+        window.onload = function() {
+            loadCheckboxes();
+            populateClassDropdown();
+        };
+		
+		
+
+    </script>
+<
 </body>
 </html>
